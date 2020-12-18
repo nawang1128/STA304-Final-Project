@@ -1,0 +1,110 @@
+---
+title: "Analysing what affects on People’s feeling of life"
+author: "Ruotong Wang"
+date: "December, 16th, 2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include = FALSE, echo = FALSE}
+library(tidyverse)
+library(survey)
+gss <- read.csv("/Users/Nancy/Desktop/GSS 2017/gss.csv")
+data <- select(gss,  age, total_children, feelings_life, income_respondent, hh_size)
+data <- na.omit(data)
+```
+
+## Abstract
+
+People's feeling of life shows people's self-rated life quality. In fact, their self-rated life quality would be affected by anything, and it depends on people's thought. In this analysis, the dataset was obtained from the 2017 GSS database, and it's focus on a variable 'feelings of life' (people's self-rated life quality). From the original dataset, I selected some variables that I think would affect on people's evaluation on life quality. To prove my opinion, I built a linear regression model and also made some plots between people's evaluation on life quality and other variables. Based on these, I want to make sure which variable mostly affect people's evaluation. \ 
+
+## Keywords
+
+Linear Regression Model, Scatter Plot, Residual Plot, Observational Study, Life Quality, Income, Children Number, Age, House Size \ 
+
+## Introduction
+
+Quality of life includes everything from physical health, family, education, employment, wealth, safety, security to freedom, religious beliefs, and the environment. In modern society, self-rated life quality would be affected by anything, and this all depends on different people’s opinions. In general, the things we need for our daily life need to be traded by money, and the money would mostly come from our income. Does this mean that higher income would change people’s self-rated life quality? Or there would be other things except income that could change people’s self-rated quality of life. \ 
+
+In this report, the dataset is from the 2017 General Social Survey (GSS) on the Family. This data was used in Problem Set 2 this semester and this time it would be used again as a data-driven way. This analysis would focus on what variables affect people’s self-rated life quality, and select some variables from GSS that people think would mostly affect it in general. \ 
+
+Based on the selected variables in GSS, there would be a linear regression model to show the relationship between people’s self-rated life quality and other variables. The detailed information on data selecting and model building would be explained in the Methodology section. Results of the linear regression model are provided in the Result section. There would also be some plots shown in the Result section. The inferences of this data along with conclusions are presented in the Conclusion section. In this section, it would also include the weakness of using the model and plots, and what should be improved. \ 
+
+## Methodology
+
+# Data
+
+This survey was taken from February 2nd to November 30th in 2017 as the 2017 General Social Survey (GSS) on the Family. The goal of this survey is to gather information on social trends in order to know well about changes in the living conditions and well-being of Canadians. The target population is all non-institutionalized persons aged from 15 years old and older and lived in the 10 provinces of Canada. This survey used a frame that created in 2013, and it combines people's telephone number and their addresses that they leave at Statistics Canada’s Address Register. The data was collected via a telephone survey. In this survey, each respondent was randomly selected from each household and its stratified random sampling. The target sampling size for this survey was 20,000, but the actual number of respondents is 20,602. \ 
+
+The good thing of this data is all of the respondents are willing to answer the following questions in the phone survey. There are less NA than other datasets. After selecting the variables needed for this analysis and dropping all of the cases with NA, there are 20,312 usable cases out of the total 20,602 cases. The bad thing of this data is also all of the respondents are willing to answer the following questions in the phone survey. It makes this survey more like a volunteer sampling. The data was taken by answering the phone which means the respondents are only the people who want to answer questions for this survey. People who are not willing to answer questions would not be collected in this dataset. Then this data could not explain the living conditions and well-being of Canadians well. \ 
+
+# Model
+```{r echo=FALSE}
+set.seed(5712)
+N=30000
+n=length(data$feelings_life)
+fpc.srs = rep(N, n)
+feeling.design <- svydesign(id=~1, data = data, fpc=fpc.srs)
+mysvylm <- svyglm(feelings_life ~ age + total_children + income_respondent + hh_size, feeling.design, family="gaussian")
+summary.lm(mysvylm)
+```
+
+The built linear regression's coefficients is on above. The linear regression model between the response variable (people’s self-rated life quality) and the predictors (respondents' age, total children number, income, and house number on holding) is $\hat{y} = \beta_0 + \beta_a * age + \beta_c * children + \beta_1 * income1 + \beta_2 * income2 + \beta_3 * income3 + \beta_4 * income4 + \beta_5 * income5 + \beta_h * house$. And the linear regression model with actual number in is $\hat{y} = 7.359 + 0.009 * age + 0.021 * children + 0.173 * income1 - 0.205 * income2 - 0.097 * income3 - 0.003 * income4 - 0.392 * income5 + 0.176 * house$. Based on this linear regression model, $\beta_1$ to $\beta_5$ are all dummy variables. $\hat{y}$ represents the predicted people’s self-rated life quality; $\beta_0 = 7.359$ represents the predicted people’s self-rated life quality would be 7.359 when age, total children number and house number are zero and the income level is in between 100,000 dollars and 124,999 dollars. $age$ represents the age of the respondent. $\beta_a = 0.009$ represents when other variable doen not change, if the age of the respondent increase 1 unit, the self-rated life quality would increase by 0.009 unit. $children$ represents total children in each respondent's family. $\beta_c = 0.021$ represents when other variable doen not change, if the total children number increase 1 unit, the self-rated life quality would increase by 0.021 unit. $house$ represents house number holding in each respondent. $\beta_h = 0.176$ represents when other variable doen not change, if the house number increase 1 unit, the self-rated life quality would increase by 0.176 unit.  $income1$ to $income5$ represents the five income levels except the income level is in between 100,000 dollars and 124,999 dollars, because the income level is in between 100,000 dollars and 124,999 dollars is as baseline automatically by R. $income1$ represents the income level is from 125,000 dollars and more. $income2$ represents the income level is in between 25,000 dollars and 49,999 dollars. $income3$ represents the income level is in between 50,000 dollars and 74,999 dollars. $income4$ represents the income level is in between 75,000 dollars and 99,999 dollars. $income5$ represents the income level is less than 25,000 dollars. $\beta_1 = 0.173$ represents when other variable doen not change, if the income level changes from the baseline level to $income1$, the self-rated life quality would increase by 0.173 unit. $\beta_1 = 0.173$ and $\beta_2 = -0.205$ then $\beta_1 - \beta_2 = 0.378$, which means when other variable doen not change, the income level changes from $income1$ to $income2$, the self-rated life quality would increase by 0.378 unit. $\beta_2 = -0.205$ and $\beta_3 = -0.097$ then $\beta_2 - \beta_3 = -0.108$, which means when other variable doen not change, the income level changes from $income2$ to $income3$, the self-rated life quality would decrease by 0.108 unit. $\beta_3 = -0.097$ and $\beta_4 = -0.003$ then $\beta_3 - \beta_4 = -0.094$, which means when other variable doen not change, the income level changes from $income3$ to $income4$, the self-rated life quality would decrease by 0.094 unit. $\beta_4 = -0.003$ and $\beta_5 = -0.392$ then $\beta_4 - \beta_5 = 0.389$, which means when other variable doen not change, the income level changes from $income4$ to $income5$, the self-rated life quality would increase by 0.389 unit. \ 
+
+```{r  echo=FALSE}
+fullmodel = lm(feelings_life ~ age + total_children + income_respondent + hh_size, data = data)
+back_AIC = step(fullmodel, direction = "backward")
+```
+To make sure the model I used is the most simple one and there are no variables I need to drop, then I used the backward AIC to prove it. After proving the model, the linear regression model above is the most simple one. Based on the result of the linear regression model above, the R-squared equals to 0.029. This means there are 2.9% variation in self-rated life quality can be explined by the model. Each variable has a p-value, and p-value is a valuation to see if each variable is significant. There are two variables' p-value are bigger than 0.05, they are $income3$ and $income4$. This means $income3$ and $income4$ are not significant to this model. The other variables' p-value are all smaller than 0.05 which means they are significant to this model. Based on this, we could look at the result of the F-statistic. The p-value of the F-statistic is smaller than 0.05, which means even there are two variables are not significant, but the whole model is significant. \ 
+
+## Results
+```{r echo=FALSE}
+attach(data)
+plot(data$feelings_life, data$age, main = "Figure1: Scatterplot between people's feeling and age")
+```
+By looking at FIGURE 1, it is a scatterplot and shows the relationship between people’s self-rated life quality and each respondent's age. We could see that most people rated their self life quality between 5 to 10, which means they think their life quality is fair, good or even excellent. Even if most people think their quality of life is good enough, there are still a part of people that think their quality of life is not good (the rate is between 0 to 4). On the other hand, most younger people rated their life quality higher. The older people rated their life quality equally from lower to higher. \ 
+
+```{r echo=FALSE}
+plot(data$feelings_life, data$total_children, main = "Figure2: Scatterplot between people's feeling and children number")
+```
+By looking at FIGURE 2, it is a scatterplot and shows the relationship between people’s self-rated life quality and each respondent's children number. From FIGURE 2, most people rated their life quality equally from 2 to 7, which means most people who have children number from 0 to 7 think their life is not bad. Also, we could see there are no people who have children from 5 to 7 who think their quality of life is really bad (rated from 0 to 1). \ 
+
+```{r echo=FALSE}
+summary(income_respondent)
+plot(data$feelings_life, data$income_respondent, main = "Figure3: Scatterplot between people's feeling and income")
+```
+By looking at FIGURE 3, it is a scatterplot and shows the relationship between people’s self-rated life quality and each respondent's income. Depending on the autometical R result, 1 represents the income level from 100,000 dollars to 124,999 dollars; 2 represents the income level from 125,000 dollars to more; 3 represents the income level from 25,000 dollars to 49,999 dollars; 4 represents the income level from 50,000 dollars to 74,999 dollars; 5 represents the income level from 75,000 dollars to 99,999 dollars; 6 represents the income level less than 25,000 dollars. From FIGURE 3, most people whose income level is from 100,000 dollars to more think their life quality is good and excellent. The people in other income levels rated their life quality equally from 0 to 10. \ 
+
+```{r echo=FALSE}
+plot(data$feelings_life, data$hh_size, main = "Figure4: Scatterplot between people's feeling and house number")
+```
+By looking at FIGURE 4, it is a scatterplot and shows the relationship between people’s self-rated life quality and each respondent's house number. From FIGURE 4, the most of people rated their life quality equally from 3 to 7, which means most of people think their life is not bad. It's similar with the FIGURE 2 showing. Also, we could see there are only a small part of people who have house numbers from 4 to 6 think their life quality is really bad (rated from 0 to 1) and most of the people who think their life quality is really bad have less houses on holding. \ 
+
+## Discussion
+
+# Summary
+
+This analysis is focused on what kinds of variables affect people's self rated life quality. The predictors in this analysis are age, number of children, income level and number of houses on holding. Based on this, I made a linear regression model, and I also made a backward AIC to prove the linear regression model. Then I made four scatterplots between the response variable and each predictor to see their relationship. \ 
+
+# Conclusion
+
+Based on the Result section, FIGURE 1 to FIGURE 4 shows the relationship between people's self rated life quality and four predictors (age, number of children, income level and number of houses on hold). Each of the predictors would affect people's self rated life quality on some parts. Younger people rated their quality of life higher, and this may be caused by their passion for life and less pressure of life. If a family has more children, then the respondents would rate their life quality higher. Children would bring more pressure to a family but more happiness. Higher income would affect people to rate their quality of life higher because the demand of our daily life needs to use money to trade. More money can buy things with higher quality. Things with higher quality would make people think their life is on a higher stage. It's similar to the number of houses on hold. If a person can hold more houses on hand, then this person is wealthier. Then this person would think his/her life is of a higher quality. \ 
+
+The researcher pointed out (citation3) that quality of life includes everything from physical health, family, education, employment, wealth, safety, security to freedom, religious beliefs, and the environment. The results in this analysis could prove this point. Age could be included in the physical health part, number of children could be included in the family part, and the income and number of houses on holding could be included in the wealth part. As physical health, family and wealth are included in quality of life, the changes in these parts would affect people to think about their own quality of life. \ 
+
+# Weaknesses & Next Steps
+
+First of all, the weakness of the analysis is the linear regression model is too simple, and it's a very basic model in statistics. Secondly, the dataset is not large enough to represent the people in the whole of Canada. From research, we can know that there are 37.89 million people living in Canada in 2020, but there are only 20,602 people who took this survey in 2017. So this survey could not present well as the whole of Canada. \ 
+
+In the future, I can use a more accurate model to do this analysis. After using a more accurate model, I could see if the result of the linear regression model is correct. Based on the research (citation3), quality of life includes everything from physical health, family, education, employment, wealth, safety, security to freedom, religious beliefs, and the environment. As a good analysis, I could prove all of these parts and put them in a linear regression model to see in the future. \ 
+
+## References
+
+citation1: Gagné, C., Roberts, G. and Keown, L.-A. (2014) “Weighted estimation and bootstrap variance estimation for analyzing survey data: How to implement in selected software”. The Research Data Centres Information and Technical Bulletin. (Winter) 6(1):5-70. Statistics Canada Catalogue no. 12-002-X. http://www.statcan.gc.ca/bsolc/olc-cel/olc-cel?catno=12-002- X20040027032&lang=eng
+
+citation2: https://sda-artsci-utoronto-ca.myaccess.library.utoronto.ca/sdaweb/dli2/gss/gss31/gss31/more_doc/GSS31_User_Guide.pdf
+
+citation3: https://en.wikipedia.org/wiki/Quality_of_life#:~:text=Quality%20of%20life%20(QOL)%20is,and%20positive%20features%20of%20life.&text=Quality%20of%20life%20includes%20everything,religious%20beliefs%2C%20and%20the%20environment.
